@@ -1,0 +1,8 @@
+venv/
+.venv/
+__pycache__/
+*.pyc
+.env
+chroma_db/
+.git/
+how do we write this like thatsthe folder of venv then what is .venv./
