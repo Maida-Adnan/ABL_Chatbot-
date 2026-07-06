@@ -15,8 +15,6 @@ If the context does not contain the answer, say clearly that you don't have that
 Context:
 {context_text}
 
-Question: {question}
-
-Answer:"""
+Question: {question}"""
 
     return prompt

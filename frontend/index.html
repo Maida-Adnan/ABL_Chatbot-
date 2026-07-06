@@ -223,7 +223,7 @@
   <div class="chat-container">
     <div class="messages" id="messages">
       <div class="welcome">
-        <h2>Hi, I'm ABL Chatbot</h2>
+        <h2>Hi, I'm ABL Chatbot </h2>
         <p>I can help you with Allied Bank's products, accounts,<br/>cards, digital banking, and more.</p>
         <div class="welcome-chips">
           <div class="chip" onclick="sendChip(this)">How do I activate my Asaan Mobile Account?</div>
@@ -250,6 +250,7 @@
 
   <script>
     const API_URL = "http://127.0.0.1:8000/chat";
+    let sessionId = "";
 
     function autoResize(el) {
       el.style.height = "auto";
@@ -301,6 +302,9 @@
       avatar.textContent = "A";
       const bubble = document.createElement("div");
       bubble.className = "bubble";
+      bubble.style.background = "white";
+      bubble.style.color = "#a888";
+      bubble.style.boxShadow = "0 1px 4px rgba(0,0,0,0.08)";
       bubble.innerHTML = '<div class="dots"><span></span><span></span><span></span></div> Thinking...';
       div.appendChild(avatar);
       div.appendChild(bubble);
@@ -328,12 +332,14 @@
         const response = await fetch(API_URL, {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ question })
+          body: JSON.stringify({ question, session_id: sessionId })  // 1. SHIPPING IT OUT to the chat router then it will go to rag pipleline from the router 
         });
-        const data = await response.json();
+        const data = await response.json();    // 2. RECEIVING THE PACKET  // <--- THIS line converts the JSON text (which was received to us from the chat router as FASTapi converted the python object into json text) into a JS Object
         removeThinking();
         if (response.ok) {
-          addMessage(data.answer, "bot");
+          sessionId = data.session_id;    // 3. RETRIEVING & OVERWRITING IT
+          addMessage(data.answer, "bot");// 4. SHOWING THE TEXT
+
         } else {
           addMessage("Something went wrong. Please try again.", "bot");
         }

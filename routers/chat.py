@@ -1,23 +1,39 @@
 # routers/chat.py
+import uuid
 from fastapi import APIRouter, HTTPException
 from pydantic import BaseModel
 from core.rag_pipeline import answer_question
+from core.memory import clear_history
 
 router = APIRouter()
 
 
 class ChatRequest(BaseModel):
     question: str
+    session_id: str = ""  # optional — frontend generates this
 
 
 class ChatResponse(BaseModel):
     answer: str
+    session_id: str
 
 
 @router.post("/chat", response_model=ChatResponse)
+
 def chat(request: ChatRequest):
     if not request.question or not request.question.strip():
         raise HTTPException(status_code=400, detail="Question cannot be empty.")
 
-    answer = answer_question(request.question)
-    return ChatResponse(answer=answer)
+    # If no session_id provided, generate one (first message in a new conversation)
+    session_id = request.session_id or str(uuid.uuid4())
+
+    answer = answer_question(request.question, session_id)
+    return ChatResponse(answer=answer, session_id=session_id) # returning a pydantic class instance 
+
+
+@router.post("/chat/reset")
+
+def reset_chat(session_id: str):
+    """Clears conversation history for a session."""
+    clear_history(session_id)
+    return {"message": "Conversation history cleared."}

@@ -21,14 +21,29 @@ MAX_WORDS = 400
 OVERLAP_WORDS = 50
 
 
-def extract_text_from_pdf(pdf_path: str) -> str:
-    """Reads a PDF file and returns all its text as one string."""
-    reader = PdfReader(pdf_path)
-    full_text = ""
-    for page in reader.pages:
-        full_text += page.extract_text() + "\n"
-    return full_text
+import fitz  # PyMuPDF
 
+def extract_text_from_pdf(pdf_path: str) -> str:
+    """
+    Reads a PDF file using layout block-detection to preserve reading order,
+    preventing side-by-side tables or columns from bleeding into the wrong sections.
+    """
+    doc = fitz.open(pdf_path)
+    full_text = ""
+    
+    for page in doc:
+        # "blocks" extracts text chunk-by-chunk based on spatial layout paragraphs
+        blocks = page.get_text("blocks")
+        # Sort blocks primarily top-to-bottom, then left-to-right
+        blocks.sort(key=lambda b: (b[1], b[0])) 
+        
+        for block in blocks:
+            text_content = block[4].strip()
+            if text_content:
+                full_text += text_content + "\n"
+        full_text += "\n"  # Pad pages clearly
+        
+    return full_text
 
 _AI_BLOB_PATTERN = re.compile(
     r'Topic:.*?(?=\nProduct:|\nProcess:|\Z)',
