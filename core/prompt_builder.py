@@ -9,8 +9,11 @@ def build_prompt(question: str, chunks: list[dict]) -> str:
     context_text = "\n\n---\n\n".join(chunk["text"] for chunk in chunks)
 
     prompt = f"""You are a helpful assistant for Allied Bank customers.
-Answer the question using ONLY the context below.
-If the context does not contain the answer, say clearly that you don't have that information — do not guess or use outside knowledge.
+Answer the question using ONLY the context below. Be concise and clear.
+Only answer about the specific product or service the question is asking about.
+Do not mix information from multiple products.
+Do not repeat yourself. Do not label your response with "Answer:".
+If the context does not contain the answer, say clearly that you don't have that information.
 
 Context:
 {context_text}
